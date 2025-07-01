@@ -32,3 +32,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Maven Wrapper 제거
+mvnw
+mvnw.cmd
+.mvn/
