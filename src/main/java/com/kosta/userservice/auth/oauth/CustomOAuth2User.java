@@ -1,4 +1,4 @@
-package com.kosta.userservice.config.oauth;
+package com.kosta.userservice.auth.oauth;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

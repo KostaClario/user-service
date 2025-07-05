@@ -1,7 +1,7 @@
-package com.kosta.userservice.config.jwt;
+package com.kosta.userservice.auth.jwt;
 
 
-import com.kosta.userservice.config.oauth.CustomOAuth2User;
+import com.kosta.userservice.auth.oauth.CustomOAuth2User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

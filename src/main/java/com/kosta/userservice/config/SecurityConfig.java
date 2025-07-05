@@ -1,8 +1,8 @@
 package com.kosta.userservice.config;
 
-import com.kosta.userservice.config.jwt.JwtAuthorizationFilter;
-import com.kosta.userservice.config.oauth.CustomOAuth2SuccessHandler;
-import com.kosta.userservice.config.oauth.CustomOAuth2UserService;
+import com.kosta.userservice.auth.jwt.JwtAuthorizationFilter;
+import com.kosta.userservice.auth.oauth.CustomOAuth2SuccessHandler;
+import com.kosta.userservice.auth.oauth.CustomOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

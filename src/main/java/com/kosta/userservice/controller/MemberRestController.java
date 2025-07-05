@@ -1,6 +1,6 @@
 package com.kosta.userservice.controller;
 
-import com.kosta.userservice.config.oauth.CustomOAuth2User;
+import com.kosta.userservice.auth.oauth.CustomOAuth2User;
 import com.kosta.userservice.dto.JoinRequestDTO;
 import com.kosta.userservice.dto.JoinResponseDTO;
 import com.kosta.userservice.dto.UpdateProfileRequestDTO;
@@ -10,9 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
