@@ -1,6 +1,7 @@
-package com.kosta.userservice.config.oauth;
+package com.kosta.userservice.auth.oauth;
 
-import com.kosta.userservice.config.jwt.JwtUtil;
+import com.kosta.userservice.auth.jwt.JwtUtil;
+import com.kosta.userservice.auth.token.RefreshTokenService;
 import com.kosta.userservice.domain.Member;
 import com.kosta.userservice.domain.MemberRepository;
 import jakarta.servlet.ServletException;
@@ -18,10 +19,12 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
     private final MemberRepository memberRepository;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
 
-    public CustomOAuth2SuccessHandler(MemberRepository memberRepository, JwtUtil jwtUtil) {
+    public CustomOAuth2SuccessHandler(MemberRepository memberRepository, JwtUtil jwtUtil, RefreshTokenService refreshTokenService) {
         this.memberRepository = memberRepository;
         this.jwtUtil = jwtUtil;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @Override
@@ -34,17 +37,25 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         String email = oAuth2User.getAttribute("email");
         String picture = oAuth2User.getAttribute("picture");;
 
-        String token = jwtUtil.generateToken(email, picture);
+        String accessToken = jwtUtil.generateToken(email, picture);
+        String refreshToken = jwtUtil.generateRefreshToken(email, picture);
+
+        refreshTokenService.saveRefreshToken(email, refreshToken);
+
 
         // 회원 활성화 여부 확인
         Member member = memberRepository.findByEmail(email).orElse(null);
 
-        String redirectUrl;
-        if (member != null && Boolean.TRUE.equals(member.isActivated())) {
-            redirectUrl = "http://localhost:8884/html/account/auth-success.html?token=" + token;
-        } else {
-            redirectUrl = "http://localhost:8884/html/account/privacy.html?token=" + token;
-        }
+        // 클라이언트에 전달할 redirect URL
+        String baseUrl = "http://localhost:8884/html/account/";
+        String page = (member != null && Boolean.TRUE.equals(member.isActivated()))
+                ? "auth-success.html"
+                : "privacy.html";
+
+        // accessToken, refreshToken 둘 다 URL로 전달
+        String redirectUrl = baseUrl + page +
+                "?accessToken=" + accessToken +
+                "&refreshToken=" + refreshToken;
 
         log.info("OAuth2 로그인 성공 - 리다이렉트: {}", redirectUrl);
         response.sendRedirect(redirectUrl);

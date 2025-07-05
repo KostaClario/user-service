@@ -1,4 +1,4 @@
-package com.kosta.userservice.config.jwt;
+package com.kosta.userservice.auth.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -24,6 +24,16 @@ public class JwtUtil {
                 .withClaim("picture", picture)
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + jwtProperties.getExpiration()))
+                .sign(Algorithm.HMAC256(jwtProperties.getSecret()));
+    }
+
+    public String generateRefreshToken(String email, String picture){
+        return JWT.create()
+                .withSubject("RefreshToken")
+                .withClaim("email", email)
+                .withClaim("picture", picture)
+                .withIssuedAt(new Date())
+                .withExpiresAt(new Date(System.currentTimeMillis() + jwtProperties.getRefreshExpiration()))
                 .sign(Algorithm.HMAC256(jwtProperties.getSecret()));
     }
 

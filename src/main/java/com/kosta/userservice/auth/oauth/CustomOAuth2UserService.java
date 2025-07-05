@@ -1,6 +1,9 @@
-package com.kosta.userservice.config.oauth;
+package com.kosta.userservice.auth.oauth;
 
 
+import com.kosta.userservice.auth.jwt.JwtUtil;
+import com.kosta.userservice.auth.token.RefreshTokenService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -15,6 +18,14 @@ import java.util.Map;
 @Service
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
+    private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
+
+    public CustomOAuth2UserService(final JwtUtil jwtUtil, final RefreshTokenService refreshTokenService) {
+        this.jwtUtil = jwtUtil;
+        this.refreshTokenService = refreshTokenService;
+    }
+
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
@@ -27,6 +38,10 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         log.info("email = {}" , attributes.get("email"));
         log.info("picture = {}" , attributes.get("picture"));
+
+        String refreshToken = jwtUtil.generateRefreshToken(email, picture);
+
+        refreshTokenService.saveRefreshToken(email, refreshToken);
 
         return new CustomOAuth2User(email, picture);
     }
