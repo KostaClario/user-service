@@ -42,6 +42,9 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         refreshTokenService.saveRefreshToken(email, refreshToken);
 
+        log.info("accessToken= {}", accessToken);
+        log.info("refreshToken= {}", refreshToken);
+
 
         // 회원 활성화 여부 확인
         Member member = memberRepository.findByEmail(email).orElse(null);
