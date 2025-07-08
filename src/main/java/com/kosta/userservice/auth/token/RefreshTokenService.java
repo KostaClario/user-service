@@ -1,5 +1,6 @@
 package com.kosta.userservice.auth.token;
 
+import com.kosta.userservice.auth.jwt.JwtProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -11,10 +12,11 @@ import java.util.concurrent.TimeUnit;
 public class RefreshTokenService {
 
     private final RedisTemplate<String, String> redisTemplate;
-    private static final long REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60;
+    private final JwtProperties jwtProperties;
 
     public void saveRefreshToken(String userEmail, String refreshToken) {
-        redisTemplate.opsForValue().set(userEmail, refreshToken, REFRESH_TOKEN_TTL, TimeUnit.SECONDS);
+        long ttlSeconds = jwtProperties.getRefreshExpiration() / 1000;
+        redisTemplate.opsForValue().set(userEmail, refreshToken, ttlSeconds, TimeUnit.SECONDS);
     }
 
     public String getRefreshToken(String userEmail) {
