@@ -39,10 +39,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         log.info("email = {}" , attributes.get("email"));
         log.info("picture = {}" , attributes.get("picture"));
 
-        String refreshToken = jwtUtil.generateRefreshToken(email, picture);
-
-        refreshTokenService.saveRefreshToken(email, refreshToken);
-
         return new CustomOAuth2User(email, picture);
     }
 }
