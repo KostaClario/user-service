@@ -2,6 +2,8 @@ package com.kosta.userservice.auth.token;
 
 
 import com.kosta.userservice.auth.jwt.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,10 @@ public class RefreshTokenController {
         this.refreshTokenService = refreshTokenService;
     }
 
+    @Operation(
+            summary = "Access Token 재발급",
+            description = "유효한 Refresh Token이 있다면 Access Token을 새로 발급받습니다."
+    )
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");
@@ -35,6 +41,12 @@ public class RefreshTokenController {
         }
     }
 
+
+    @Operation(
+            summary = "로그아웃",
+            description = "Authorization 헤더에 포함된 Access Token에서 사용자 정보를 추출하여 Refresh Token을 삭제합니다.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
 
