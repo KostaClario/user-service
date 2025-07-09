@@ -23,12 +23,14 @@ public class JoinRequestDTO {
     @NotBlank(message = "이메일은 필수입니다.")
     private String email;
 
-    @NotBlank(message = "제공자는 필수입니다.")
-    private String provider;
+//    @NotBlank(message = "제공자는 필수입니다.")
+//    private String provider;
+//
+//    @NotNull(message = "총 금액은 필수입니다.")
+//    private Long totalAmount;
+//
+//    @NotNull(message = "목표 금액은 필수입니다.")
+//    private Long goalAmount;
 
-    @NotNull(message = "총 금액은 필수입니다.")
-    private Long totalAmount;
-
-    @NotNull(message = "목표 금액은 필수입니다.")
-    private Long goalAmount;
+    private String picture;
 }
