@@ -13,6 +13,9 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 @Slf4j
 @Component
 public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler {
@@ -45,6 +48,9 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         log.info("accessToken= {}", accessToken);
         log.info("refreshToken= {}", refreshToken);
 
+        String encodedAccessToken = URLEncoder.encode(accessToken, StandardCharsets.UTF_8);
+        String encodedRefreshToken = URLEncoder.encode(refreshToken, StandardCharsets.UTF_8);
+
 
         // 회원 활성화 여부 확인
         Member member = memberRepository.findByEmail(email).orElse(null);
@@ -53,12 +59,12 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         String baseUrl = "http://localhost:8884/html/account/";
         String page = (member != null && Boolean.TRUE.equals(member.isActivated()))
                 ? "auth-success.html"
-                : "privacy.html";
+                : "join.html";
 
         // accessToken, refreshToken 둘 다 URL로 전달
         String redirectUrl = baseUrl + page +
-                "?accessToken=" + accessToken +
-                "&refreshToken=" + refreshToken;
+                "?accessToken=" + encodedAccessToken +
+                "&refreshToken=" + encodedRefreshToken;
 
         log.info("OAuth2 로그인 성공 - 리다이렉트: {}", redirectUrl);
         response.sendRedirect(redirectUrl);
