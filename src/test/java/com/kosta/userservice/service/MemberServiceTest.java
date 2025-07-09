@@ -5,7 +5,6 @@ import com.kosta.userservice.domain.MemberRepository;
 import com.kosta.userservice.dto.JoinRequestDTO;
 import com.kosta.userservice.dto.UpdateProfileRequestDTO;
 import jakarta.transaction.Transactional;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class MemberServiceTest {
 
     @Autowired
-    MemberService memberService;
+    MemberServiceImpl memberService;
 
     @Autowired
     MemberRepository memberRepository;
@@ -38,9 +37,9 @@ class MemberServiceTest {
         request.setConfirmPassword("123456");
         request.setPhone("01012341234");
         request.setEmail("sonny@email.com");
-        request.setProvider("google");
-        request.setTotalAmount(0L);
-        request.setGoalAmount(10000L);
+//        request.setProvider("google");
+//        request.setTotalAmount(0L);
+//        request.setGoalAmount(10000L);
 
         // when
         memberService.createMember(request);
@@ -63,9 +62,9 @@ class MemberServiceTest {
         request1.setConfirmPassword("123456");
         request1.setPhone("01012341234");
         request1.setEmail("sonny@email.com");
-        request1.setProvider("google");
-        request1.setTotalAmount(0L);
-        request1.setGoalAmount(10000L);
+//        request1.setProvider("google");
+//        request1.setTotalAmount(0L);
+//        request1.setGoalAmount(10000L);
         memberService.createMember(request1);
 
         JoinRequestDTO request2 = new JoinRequestDTO();
@@ -74,9 +73,9 @@ class MemberServiceTest {
         request2.setConfirmPassword("123456");
         request2.setPhone("01012331231");
         request2.setEmail("sonny@email.com");
-        request2.setProvider("google");
-        request2.setTotalAmount(0L);
-        request2.setGoalAmount(10000L);
+//        request2.setProvider("google");
+//        request2.setTotalAmount(0L);
+//        request2.setGoalAmount(10000L);
 
         // when then
         assertThrows(IllegalArgumentException.class, () -> {
@@ -94,9 +93,9 @@ class MemberServiceTest {
         request.setConfirmPassword("111111");
         request.setPhone("01012341234");
         request.setEmail("sonny@email.com");
-        request.setProvider("google");
-        request.setTotalAmount(0L);
-        request.setGoalAmount(10000L);
+//        request.setProvider("google");
+//        request.setTotalAmount(0L);
+//        request.setGoalAmount(10000L);
 
         // when then
         assertThrows(IllegalArgumentException.class, () -> {
