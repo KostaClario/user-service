@@ -51,6 +51,7 @@ public class SecurityConfig {
                                 "/oauth2/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/member").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/member").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/member").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/member").authenticated()
