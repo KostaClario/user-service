@@ -55,4 +55,18 @@ public class Member {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role;
+
+    @Column
+    private LocalDateTime myDataAgreedAt;
+
+    @PrePersist
+    public void prePersist() {
+        if (myDataAgreedAt == null) {
+            myDataAgreedAt = LocalDateTime.now();
+        }
+    }
+
+    @Column(length = 100, unique = true)
+    private String ci;
+
 }
