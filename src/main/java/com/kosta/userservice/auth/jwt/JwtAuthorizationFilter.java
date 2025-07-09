@@ -13,6 +13,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * gateway-service에서 JWT 검증 중이므로 중복 검증될 수 있음
+ * 추후 안정화 후 제거 예정
+ * */
+
 @Component
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
@@ -27,27 +32,50 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+
+        // Swagger 및 정적 리소스 화이트리스트
+        if (path.startsWith("/swagger") ||
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/webjars") ||
+                path.startsWith("/css") ||
+                path.startsWith("/js") ||
+                path.startsWith("/html") ||
+
+                (path.equals("/api/member") && (method.equals("GET") || method.equals("POST")))) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = request.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
 
-            if (jwtUtil.validateToken(token)) {
-                String email = jwtUtil.getEmailFromToken(token);
-                String picture = jwtUtil.getPictureFromToken(token);
+        String token = authHeader.substring(7);
 
-                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    CustomOAuth2User user = new CustomOAuth2User(email, picture);
+        if (!jwtUtil.validateToken(token)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
 
-                    UsernamePasswordAuthenticationToken authenticationToken =
-                            new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+        String email = jwtUtil.getEmailFromToken(token);
+        String picture = jwtUtil.getPictureFromToken(token);
 
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                }
-            }
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            CustomOAuth2User user = new CustomOAuth2User(email, picture);
+
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         }
 
         filterChain.doFilter(request, response);
-
     }
-}
+    }
+
