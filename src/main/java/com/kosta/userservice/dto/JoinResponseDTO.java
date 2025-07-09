@@ -10,4 +10,5 @@ public class JoinResponseDTO {
 
     private String email;
     private String name;
+    private String accessToken;
 }
