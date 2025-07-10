@@ -140,4 +140,9 @@ public class MemberServiceImpl implements MemberService {
                 })
                 .orElse(false);
     }
+
+    public Member getMemberByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+    }
 }
