@@ -2,10 +2,8 @@ package com.kosta.userservice.controller;
 
 import com.kosta.userservice.auth.jwt.JwtUtil;
 import com.kosta.userservice.auth.oauth.CustomOAuth2User;
-import com.kosta.userservice.dto.JoinRequestDTO;
-import com.kosta.userservice.dto.JoinResponseDTO;
-import com.kosta.userservice.dto.ResetPasswordRequestDTO;
-import com.kosta.userservice.dto.UpdateProfileRequestDTO;
+import com.kosta.userservice.domain.Member;
+import com.kosta.userservice.dto.*;
 import com.kosta.userservice.service.MemberServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -29,10 +27,20 @@ public class MemberRestController {
         this.jwtUtil = jwtUtil;
     }
 
+
+    @Operation(
+            summary = "헤더에 유저정보 가져오기",
+            description = "헤더에 이메일, 이름, 프로필사진 가져옴")
     @GetMapping("/member")
-    public ResponseEntity<?> me(@RequestHeader("X-User-Email") String email,
-                                @RequestHeader("X-User-Picture") String picture) {
-        return ResponseEntity.ok("email = " + email + ", picture = " + picture);
+    public ResponseEntity<MemberInfoResponse> getUserInfo(@AuthenticationPrincipal CustomOAuth2User user) {
+
+        Member member = memberService.getMemberByEmail(user.getEmail());
+        MemberInfoResponse response = new MemberInfoResponse();
+        response.setEmail(member.getEmail());
+        response.setName(member.getName());
+        response.setPicture(user.getPicture());
+
+        return ResponseEntity.ok(response);
     }
 
 
