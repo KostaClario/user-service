@@ -2,7 +2,7 @@ package com.kosta.userservice.controller;
 
 import com.kosta.userservice.auth.jwt.JwtUtil;
 import com.kosta.userservice.auth.oauth.CustomOAuth2User;
-import com.kosta.userservice.domain.Member;
+import com.kosta.userservice.domain.entity.Member;
 import com.kosta.userservice.dto.*;
 import com.kosta.userservice.service.MemberServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -96,7 +96,7 @@ public class MemberRestController {
     @Operation(summary = "비밀번호 재설정",
             description = "현재 로그인된 사용자 비밀번호 재설정",
             security = @SecurityRequirement(name = "bearerAuth"))
-    @PostMapping("/reset-password")
+    @PostMapping("/member/reset-password")
     public ResponseEntity<?> resetPassword(@AuthenticationPrincipal CustomOAuth2User user,
                                            @RequestBody @Validated ResetPasswordRequestDTO request) {
 
@@ -105,4 +105,24 @@ public class MemberRestController {
         return ResponseEntity.status(HttpStatus.OK).body("비밀번호 재설정 완료");
 
     }
+
+    @Operation(summary = "비밀번호 체크",
+            description = "비밀번호 체크 후 개인정보수정 페이지 입장",
+            security = @SecurityRequirement(name = "bearerAuth"))
+    @PostMapping("/member/check-password")
+    public ResponseEntity<?> checkPassword(@RequestBody @Validated PasswordCheckRequestDTO requestDTO,
+                                           @AuthenticationPrincipal CustomOAuth2User user) {
+
+        boolean result = memberService.checkPassword(user.getEmail(), requestDTO);
+
+        if (result) {
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("비밀번호가 일치하지 않습니다.");
+        }
+
+    }
+
+
 }
