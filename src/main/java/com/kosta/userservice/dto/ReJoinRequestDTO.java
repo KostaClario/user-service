@@ -19,5 +19,5 @@ public class ReJoinRequestDTO {
     private String confirmPassword;
 
     @NotBlank(message = "전화번호는 필수입니다.")
-    private String phone;
+    private String phoneNum;
 }
