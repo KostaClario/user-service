@@ -1,7 +1,8 @@
 package com.kosta.userservice.service;
 
-import com.kosta.userservice.domain.Member;
-import com.kosta.userservice.domain.MemberRepository;
+import com.kosta.userservice.domain.entity.Member;
+import com.kosta.userservice.domain.enums.MemberStatus;
+import com.kosta.userservice.domain.repository.MemberRepository;
 import com.kosta.userservice.dto.JoinRequestDTO;
 import com.kosta.userservice.dto.UpdateProfileRequestDTO;
 import jakarta.transaction.Transactional;
@@ -35,7 +36,7 @@ class MemberServiceTest {
         request.setName("손흥민");
         request.setPassword("123456");
         request.setConfirmPassword("123456");
-        request.setPhone("01012341234");
+        request.setPhoneNum("01012341234");
         request.setEmail("sonny@email.com");
 //        request.setProvider("google");
 //        request.setTotalAmount(0L);
@@ -60,7 +61,7 @@ class MemberServiceTest {
         request1.setName("손흥민");
         request1.setPassword("123456");
         request1.setConfirmPassword("123456");
-        request1.setPhone("01012341234");
+        request1.setPhoneNum("01012341234");
         request1.setEmail("sonny@email.com");
 //        request1.setProvider("google");
 //        request1.setTotalAmount(0L);
@@ -71,7 +72,7 @@ class MemberServiceTest {
         request2.setName("김민재");
         request2.setPassword("123456");
         request2.setConfirmPassword("123456");
-        request2.setPhone("01012331231");
+        request2.setPhoneNum("01012331231");
         request2.setEmail("sonny@email.com");
 //        request2.setProvider("google");
 //        request2.setTotalAmount(0L);
@@ -91,7 +92,7 @@ class MemberServiceTest {
         request.setName("손흥민");
         request.setPassword("222222");
         request.setConfirmPassword("111111");
-        request.setPhone("01012341234");
+        request.setPhoneNum("01012341234");
         request.setEmail("sonny@email.com");
 //        request.setProvider("google");
 //        request.setTotalAmount(0L);
@@ -114,17 +115,16 @@ class MemberServiceTest {
                 .id(2L)
                 .email(email)
                 .name("기존이름")
-                .phone("010-0000-0000")
-                .activated(true)
+                .phoneNum("010-0000-0000")
+                .status(MemberStatus.ACTIVE)
                 .password("password")
-                .provider("google")
                 .totalAmount(0L)
                 .goalAmount(1000L)
                 .build();
 
         UpdateProfileRequestDTO request = new UpdateProfileRequestDTO();
         request.setName("변경이름");
-        request.setPhone("010-1111-1111");
+        request.setPhoneNum("010-1111-1111");
 
         // when
         memberService.updateProfile(member.getEmail(), request);
@@ -135,7 +135,7 @@ class MemberServiceTest {
 
 
         assertThat(update.getName()).isEqualTo("변경이름");
-        assertThat(update.getPhone()).isEqualTo("010-1111-1111");
+        assertThat(update.getPhoneNum()).isEqualTo("010-1111-1111");
     }
 
     @Test
@@ -147,7 +147,7 @@ class MemberServiceTest {
 
         UpdateProfileRequestDTO request = new UpdateProfileRequestDTO();
         request.setName("변경이름");
-        request.setPhone("010-0000-0000");
+        request.setPhoneNum("010-0000-0000");
 
         // when then
         assertThrows(IllegalArgumentException.class, () -> {
