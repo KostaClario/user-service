@@ -1,9 +1,10 @@
 package com.kosta.userservice.service;
 
 import com.kosta.userservice.client.BankClient;
-import com.kosta.userservice.domain.Member;
-import com.kosta.userservice.domain.MemberRepository;
-import com.kosta.userservice.domain.Role;
+import com.kosta.userservice.domain.entity.Member;
+import com.kosta.userservice.domain.enums.MemberStatus;
+import com.kosta.userservice.domain.repository.MemberRepository;
+import com.kosta.userservice.domain.enums.Role;
 import com.kosta.userservice.dto.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -48,8 +49,8 @@ public class MemberServiceImpl implements MemberService {
             member.setName(request.getName());
         }
 
-        if (request.getPhone() != null && !request.getPhone().isBlank()) {
-            member.setPhone(request.getPhone());
+        if (request.getPhoneNum() != null && !request.getPhoneNum().isBlank()) {
+            member.setPhoneNum(request.getPhoneNum());
         }
 
         memberRepository.save(member);
@@ -60,8 +61,7 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
 
-        member.setActivated(false);
-        member.setMyDataAgreedAt(null);
+        member.setStatus(MemberStatus.INACTIVE);
 
         memberRepository.save(member);
     }
@@ -94,15 +94,16 @@ public class MemberServiceImpl implements MemberService {
     }
 
     private void ExistingMember(Member member, JoinRequestDTO request) {
-        if (member.isActivated()) {
+        if (MemberStatus.ACTIVE.equals(member.getStatus())) {
             throw new IllegalArgumentException("이미 등록된 이메일입니다.");
         }
 
         member.setName(request.getName());
-        member.setPhone(request.getPhone());
+        member.setPhoneNum(request.getPhoneNum());
         member.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
-        member.setActivated(true);
-        member.setMyDataAgreedAt(LocalDateTime.now());
+        member.setStatus(MemberStatus.ACTIVE);
+        member.setMydataConsentedAt(LocalDateTime.now());
+        member.setPersonalInfoAgreedAt(LocalDateTime.now());
 
         memberRepository.save(member);
     }
@@ -110,35 +111,32 @@ public class MemberServiceImpl implements MemberService {
     private void NewMember(JoinRequestDTO request) {
 
         BankUserInfoResponse bankInfo = bankClient.getUserInfo(
-                new BankUserInfoRequest(request.getEmail(), request.getPhone())
+                new BankUserInfoRequest(request.getEmail(), request.getPhoneNum())
         );
 
         Member newMember = Member.builder()
                 .name(request.getName())
                 .password(bCryptPasswordEncoder.encode(request.getPassword()))
-                .phone(request.getPhone())
-                .email(request.getEmail())
-                .provider("google")
+                .phoneNum(request.getPhoneNum())
+                .email(request.getEmail().toLowerCase())
                 .totalAmount(0L)
                 .goalAmount(0L)
-                .activated(true)
+                .status(MemberStatus.ACTIVE)
                 .role(Role.ROLE_USER)
-                .myDataAgreedAt(LocalDateTime.now())
-                .ci(bankInfo.getCi())
+                .memberCi(bankInfo.getMemberCi())
                 .build();
 
         memberRepository.save(newMember);
     }
 
 
-    public boolean checkPassword(String email, String password) {
+    public boolean checkPassword(String email, PasswordCheckRequestDTO passwordCheckRequest) {
 
-        return memberRepository.findByEmail(email)
-                .map(member -> {
-                    boolean result = bCryptPasswordEncoder.matches(password, member.getPassword());
-                    return result;
-                })
-                .orElse(false);
+        String rawPassword = passwordCheckRequest.getPassword();
+
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+        return bCryptPasswordEncoder.matches(rawPassword, member.getPassword());
     }
 
     public Member getMemberByEmail(String email) {
