@@ -1,11 +1,13 @@
-package com.kosta.userservice.domain;
+package com.kosta.userservice.domain.entity;
 
+import com.kosta.userservice.domain.enums.MemberStatus;
+import com.kosta.userservice.domain.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "members")
@@ -27,21 +29,28 @@ public class Member {
     private String password;
 
     @Column(nullable = false, length = 20)
-    private String phone;
+    private String phoneNum;
 
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
+    @Column(nullable = false, unique = true, updatable = false)
+    private String memberId;
+
+    @Column(nullable = false, unique = true)
+    private String memberCi;
+
     @CreationTimestamp
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
+    @CreationTimestamp
     @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    private LocalDateTime personalInfoAgreedAt;
 
-    @Column(nullable = false, length = 30)
-    private String provider;
+    @CreationTimestamp
+    @Column(nullable = false)
+    private LocalDateTime mydataConsentedAt;
 
     @Column(nullable = false)
     private Long totalAmount;
@@ -49,24 +58,18 @@ public class Member {
     @Column(nullable = false)
     private Long goalAmount;
 
-    @Column(nullable = false)
-    private boolean activated;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private MemberStatus status;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role;
 
-    @Column
-    private LocalDateTime myDataAgreedAt;
-
     @PrePersist
-    public void prePersist() {
-        if (myDataAgreedAt == null) {
-            myDataAgreedAt = LocalDateTime.now();
+    public void assignUUID() {
+        if (this.memberId == null) {
+            this.memberId = UUID.randomUUID().toString();
         }
     }
-
-    @Column(length = 100, unique = true)
-    private String ci;
-
 }
