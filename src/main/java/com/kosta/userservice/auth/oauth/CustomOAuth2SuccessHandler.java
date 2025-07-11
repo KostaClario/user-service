@@ -2,8 +2,9 @@ package com.kosta.userservice.auth.oauth;
 
 import com.kosta.userservice.auth.jwt.JwtUtil;
 import com.kosta.userservice.auth.token.RefreshTokenService;
-import com.kosta.userservice.domain.Member;
-import com.kosta.userservice.domain.MemberRepository;
+import com.kosta.userservice.domain.entity.Member;
+import com.kosta.userservice.domain.enums.MemberStatus;
+import com.kosta.userservice.domain.repository.MemberRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -57,7 +58,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         // 클라이언트에 전달할 redirect URL
         String baseUrl = "http://localhost:8884/html/account/";
-        String page = (member != null && Boolean.TRUE.equals(member.isActivated()))
+        String page = (member != null && MemberStatus.ACTIVE.equals(member.getStatus()))
                 ? "auth-success.html"
                 : "join.html";
 
