@@ -119,7 +119,7 @@ class MemberServiceTest {
                 .status(MemberStatus.ACTIVE)
                 .password("password")
                 .totalAmount(0L)
-                .goalAmount(1000L)
+                .targetAmount(1000L)
                 .build();
 
         UpdateProfileRequestDTO request = new UpdateProfileRequestDTO();
