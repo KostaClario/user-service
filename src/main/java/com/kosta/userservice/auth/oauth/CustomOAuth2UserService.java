@@ -1,5 +1,6 @@
 package com.kosta.userservice.auth.oauth;
 
+import com.kosta.userservice.dto.JoinRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -24,10 +25,14 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         String email = (String) attributes.get("email");
         String picture = (String) attributes.get("picture");
+        String provider = userRequest.getClientRegistration().getRegistrationId();
+        String providerId = (String) attributes.get("sub");
+
+        log.info("OAuth2 로그인: email={}, provider={}, providerId={}", email, provider, providerId);
 
         log.info("email = {}" , attributes.get("email"));
         log.info("picture = {}" , attributes.get("picture"));
 
-        return new CustomOAuth2User(email, picture);
+        return new CustomOAuth2User(email, picture, provider, providerId);
     }
 }

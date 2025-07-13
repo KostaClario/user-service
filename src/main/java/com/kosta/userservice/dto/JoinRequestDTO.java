@@ -33,4 +33,8 @@ public class JoinRequestDTO {
 //    private Long goalAmount;
 
     private String picture;
+
+    private String provider;
+
+    private String providerId;
 }
