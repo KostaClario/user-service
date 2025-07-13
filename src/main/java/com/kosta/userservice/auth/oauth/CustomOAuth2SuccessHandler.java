@@ -5,6 +5,7 @@ import com.kosta.userservice.auth.token.RefreshTokenService;
 import com.kosta.userservice.domain.entity.Member;
 import com.kosta.userservice.domain.enums.MemberStatus;
 import com.kosta.userservice.domain.repository.MemberRepository;
+import com.kosta.userservice.service.BankSyncService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,11 +25,14 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
     private final MemberRepository memberRepository;
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
+    private final BankSyncService bankSyncService;
 
-    public CustomOAuth2SuccessHandler(MemberRepository memberRepository, JwtUtil jwtUtil, RefreshTokenService refreshTokenService) {
+    public CustomOAuth2SuccessHandler(MemberRepository memberRepository, JwtUtil jwtUtil,
+                                      RefreshTokenService refreshTokenService, BankSyncService bankSyncService) {
         this.memberRepository = memberRepository;
         this.jwtUtil = jwtUtil;
         this.refreshTokenService = refreshTokenService;
+        this.bankSyncService = bankSyncService;
     }
 
     @Override
@@ -38,11 +42,13 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
-        String email = oAuth2User.getAttribute("email");
-        String picture = oAuth2User.getAttribute("picture");;
+        String email = oAuth2User.getEmail();
+        String picture = oAuth2User.getPicture();
+        String provider = oAuth2User.getProvider();
+        String providerId = oAuth2User.getProviderId();
 
-        String accessToken = jwtUtil.generateToken(email, picture);
-        String refreshToken = jwtUtil.generateRefreshToken(email, picture);
+        String accessToken = jwtUtil.generateToken(email, picture, provider, providerId);
+        String refreshToken = jwtUtil.generateRefreshToken(email, picture, provider, providerId);
 
         refreshTokenService.saveRefreshToken(email, refreshToken);
 
@@ -55,6 +61,17 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         // 회원 활성화 여부 확인
         Member member = memberRepository.findByEmail(email).orElse(null);
+
+        if (member != null && MemberStatus.ACTIVE.equals(member.getStatus())) {
+            try {
+                bankSyncService.syncBankTransaction(member.getMemberCi());
+                log.info("거래내역 자동 동기화 완료");
+            } catch (Exception e) {
+                log.error("거래내역 동기화 실패 = {} ", e.getMessage(), e);
+            }
+        }
+
+
 
         // 클라이언트에 전달할 redirect URL
         String baseUrl = "http://localhost:8884/html/account/";
