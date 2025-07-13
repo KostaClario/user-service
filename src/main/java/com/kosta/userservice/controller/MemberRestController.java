@@ -7,10 +7,13 @@ import com.kosta.userservice.dto.*;
 import com.kosta.userservice.service.MemberServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,7 +52,8 @@ public class MemberRestController {
             summary = "회원가입 (비활성 회원 재가입 포함)",
             description = "이메일이 이미 존재하고 비활성화된 경우 재가입 처리합니다.")
     @PostMapping("/member")
-    public ResponseEntity<JoinResponseDTO> join(@RequestBody @Validated JoinRequestDTO requestDTO) {
+    public ResponseEntity<JoinResponseDTO> join(@RequestBody @Validated JoinRequestDTO requestDTO,
+                                                HttpServletRequest httpRequest) {
 
         /**
          * 나중에 bank-service에서 가져올거임 우선 회원가입 성공을 위해 넣어줌
@@ -57,16 +61,33 @@ public class MemberRestController {
          *         requestDTO.setGoalAmount(0L);
          * */
 
+        String token = httpRequest.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+            requestDTO.setProvider(jwtUtil.getProviderFromToken(token));
+            requestDTO.setProviderId(jwtUtil.getProviderIdFromToken(token));
+            requestDTO.setEmail(jwtUtil.getEmailFromToken(token));
+        }
+
+        // 회원 생성
         memberService.createMember(requestDTO);
 
-        String email = requestDTO.getEmail();
-        String picture = requestDTO.getPicture();
-        String accessToken = jwtUtil.generateToken(email, picture);
+        // accessToken 재발급
+        String accessToken = jwtUtil.generateToken(
+                requestDTO.getEmail(),
+                requestDTO.getPicture(),
+                requestDTO.getProvider(),
+                requestDTO.getProviderId()
+        );
 
-        JoinResponseDTO responseData = new JoinResponseDTO(email, requestDTO.getName(), accessToken);
+        JoinResponseDTO responseData = new JoinResponseDTO(
+                requestDTO.getEmail(),
+                requestDTO.getName(),
+                accessToken
+        );
+
         return ResponseEntity.status(HttpStatus.CREATED).body(responseData);
     }
-
 
 
     @Operation(
