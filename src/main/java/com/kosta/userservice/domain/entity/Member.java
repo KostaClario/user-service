@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "members")
+@Table(name = "memberstmp")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -37,7 +37,7 @@ public class Member {
     @Column(nullable = false, unique = true, updatable = false)
     private String memberId;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String memberCi;
 
     @CreationTimestamp
@@ -56,7 +56,7 @@ public class Member {
     private Long totalAmount;
 
     @Column(nullable = false)
-    private Long goalAmount;
+    private Long targetAmount;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -65,6 +65,12 @@ public class Member {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role;
+
+    @Column(nullable = false)
+    private String providerId;
+
+    @Column(nullable = false)
+    private String provider;
 
     @PrePersist
     public void assignUUID() {
