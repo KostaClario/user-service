@@ -1,16 +1,20 @@
 package com.kosta.userservice.service;
 
+import com.kosta.userservice.auth.oauth.CustomOAuth2User;
 import com.kosta.userservice.client.BankClient;
 import com.kosta.userservice.domain.entity.Member;
 import com.kosta.userservice.domain.enums.MemberStatus;
 import com.kosta.userservice.domain.repository.MemberRepository;
 import com.kosta.userservice.domain.enums.Role;
 import com.kosta.userservice.dto.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class MemberServiceImpl implements MemberService {
@@ -114,16 +118,20 @@ public class MemberServiceImpl implements MemberService {
                 new BankUserInfoRequest(request.getEmail(), request.getPhoneNum())
         );
 
+
+
         Member newMember = Member.builder()
                 .name(request.getName())
                 .password(bCryptPasswordEncoder.encode(request.getPassword()))
                 .phoneNum(request.getPhoneNum())
                 .email(request.getEmail().toLowerCase())
                 .totalAmount(0L)
-                .goalAmount(0L)
+                .targetAmount(0L)
                 .status(MemberStatus.ACTIVE)
                 .role(Role.ROLE_USER)
                 .memberCi(bankInfo.getMemberCi())
+                .provider(request.getProvider())
+                .providerId(request.getProviderId())
                 .build();
 
         memberRepository.save(newMember);
@@ -142,5 +150,10 @@ public class MemberServiceImpl implements MemberService {
     public Member getMemberByEmail(String email) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+    }
+
+    public Optional<String> getMemberCiByMemberId(String memberId) {
+        return memberRepository.findByMemberId(memberId)
+                .map(Member::getMemberCi);
     }
 }
