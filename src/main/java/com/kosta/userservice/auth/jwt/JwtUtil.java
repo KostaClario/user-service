@@ -17,25 +17,53 @@ public class JwtUtil {
         this.jwtProperties = jwtProperties;
     }
 
-    public String generateToken(String email, String picture){
+    public String generateToken(String email, String picture, String provider, String providerId) {
         return JWT.create()
                 .withSubject("User")
                 .withClaim("email", email)
                 .withClaim("picture", picture)
+                .withClaim("provider", provider)
+                .withClaim("providerId", providerId)
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + jwtProperties.getExpiration()))
                 .sign(Algorithm.HMAC256(jwtProperties.getSecret()));
     }
 
-    public String generateRefreshToken(String email, String picture){
+    public String generateRefreshToken(String email, String picture, String provider, String providerId) {
         return JWT.create()
                 .withSubject("RefreshToken")
                 .withClaim("email", email)
                 .withClaim("picture", picture)
+                .withClaim("provider", provider)
+                .withClaim("providerId", providerId)
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + jwtProperties.getRefreshExpiration()))
                 .sign(Algorithm.HMAC256(jwtProperties.getSecret()));
     }
+
+    public String getProviderFromToken(String token) {
+        try {
+            DecodedJWT jwt = JWT.require(Algorithm.HMAC256(jwtProperties.getSecret()))
+                    .build()
+                    .verify(token);
+            return jwt.getClaim("provider").asString();
+        } catch (JWTVerificationException e) {
+            return null;
+        }
+    }
+
+    public String getProviderIdFromToken(String token) {
+        try {
+            DecodedJWT jwt = JWT.require(Algorithm.HMAC256(jwtProperties.getSecret()))
+                    .build()
+                    .verify(token);
+            return jwt.getClaim("providerId").asString();
+        } catch (JWTVerificationException e) {
+            return null;
+        }
+    }
+
+
 
     public String getEmailFromToken(String token){
         try{

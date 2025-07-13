@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,7 @@ import java.io.IOException;
  * gateway-service에서 JWT 검증 중이므로 중복 검증될 수 있음
  * 추후 안정화 후 제거 예정
  * */
-
+@Slf4j
 @Component
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
@@ -37,6 +38,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         // Swagger 및 정적 리소스 화이트리스트
         if (path.startsWith("/swagger") ||
+                path.startsWith("/internal") ||
                 path.startsWith("/v3/api-docs") ||
                 path.startsWith("/swagger-ui") ||
                 path.startsWith("/webjars") ||
@@ -44,6 +46,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 path.startsWith("/js") ||
                 path.startsWith("/html") ||
                 (path.equals("/api/member") && method.equals("POST"))) {
+            log.debug("Bypassing JWT filter for internal path: {}", path);
             filterChain.doFilter(request, response);
             return;
         }
@@ -64,9 +67,11 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         String email = jwtUtil.getEmailFromToken(token);
         String picture = jwtUtil.getPictureFromToken(token);
+        String provider = jwtUtil.getProviderFromToken(token);
+        String providerId = jwtUtil.getProviderIdFromToken(token);
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            CustomOAuth2User user = new CustomOAuth2User(email, picture);
+            CustomOAuth2User user = new CustomOAuth2User(email, picture, provider, providerId);
 
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());

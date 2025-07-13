@@ -32,9 +32,11 @@ public class RefreshTokenController {
         String refreshToken = request.get("refreshToken");
         String userEmail = jwtUtil.getEmailFromToken(refreshToken);
         String picture = jwtUtil.getPictureFromToken(refreshToken);
+        String provider = jwtUtil.getProviderFromToken(refreshToken);
+        String providerId = jwtUtil.getProviderIdFromToken(refreshToken);
 
         if (refreshTokenService.validateRefreshToken(userEmail, refreshToken)) {
-            String newAccessToken = jwtUtil.generateToken(userEmail, picture);
+            String newAccessToken = jwtUtil.generateToken(userEmail, picture, provider, providerId);
             return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지않은 refresh token");
