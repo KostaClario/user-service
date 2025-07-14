@@ -53,21 +53,26 @@ public class MemberServiceImpl implements MemberService {
             member.setName(request.getName());
         }
 
-        if (request.getPhoneNum() != null && !request.getPhoneNum().isBlank()) {
-            member.setPhoneNum(request.getPhoneNum());
+        if (request.getPhonenum() != null && !request.getPhonenum().isBlank()) {
+            member.setPhoneNum(request.getPhonenum());
         }
 
         memberRepository.save(member);
     }
 
     @Override
-    public void removeMember(String email) {
+    public boolean removeMember(String email, String password) {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+
+        if (!bCryptPasswordEncoder.matches(password, member.getPassword())) {
+            return false;
+        }
 
         member.setStatus(MemberStatus.INACTIVE);
 
         memberRepository.save(member);
+        return true;
     }
 
     @Override
