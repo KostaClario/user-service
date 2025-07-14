@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,6 +17,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -108,10 +112,15 @@ public class MemberRestController {
 
     @Operation(summary = "회원 탈퇴", security = @SecurityRequirement(name = "bearerAuth"))
     @DeleteMapping("/member")
-    public ResponseEntity<?> removeMember(@AuthenticationPrincipal CustomOAuth2User user) {
-        String email = user.getEmail();
-        memberService.removeMember(email);
-        return ResponseEntity.status(HttpStatus.OK).body("회원 탈퇴 완료");
+    public ResponseEntity<?> removeMember(@AuthenticationPrincipal CustomOAuth2User user,
+                                          @RequestBody @Validated RemoveMemberRequestDTO request) {
+
+        boolean success = memberService.removeMember(user.getEmail(), request.getPassword());
+
+        if (success) {
+            return ResponseEntity.status(HttpStatus.OK).body("회원 탈퇴 완료");
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 일치하지 않습니다.");
     }
 
     @Operation(summary = "비밀번호 재설정",
@@ -145,5 +154,20 @@ public class MemberRestController {
 
     }
 
+    @GetMapping("/member/email")
+    public ResponseEntity<Map<String, String>> getEmail(@AuthenticationPrincipal CustomOAuth2User user) {
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
+        Map<String, String> result = new HashMap<>();
+        result.put("email", user.getEmail());
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/member/id")
+    public ResponseEntity<MemberIdResponseDTO> getMemberId(@AuthenticationPrincipal CustomOAuth2User user) {
+        Member member = memberService.getMemberByEmail(user.getEmail());
+        return ResponseEntity.ok(new MemberIdResponseDTO(member.getMemberId()));
+    }
 }
