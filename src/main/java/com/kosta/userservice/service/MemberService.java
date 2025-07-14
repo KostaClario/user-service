@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface MemberService {
     void createMember(JoinRequestDTO request);
     void updateProfile(String email, UpdateProfileRequestDTO request);
-    void removeMember(String email);
+    boolean removeMember(String email, String password);
     void resetPassword(String email, ResetPasswordRequestDTO request);
     Optional<String> getMemberCiByMemberId(String memberId);
 }
