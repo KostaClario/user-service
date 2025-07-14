@@ -124,7 +124,7 @@ class MemberServiceTest {
 
         UpdateProfileRequestDTO request = new UpdateProfileRequestDTO();
         request.setName("변경이름");
-        request.setPhoneNum("010-1111-1111");
+        request.setPhonenum("010-1111-1111");
 
         // when
         memberService.updateProfile(member.getEmail(), request);
@@ -147,7 +147,7 @@ class MemberServiceTest {
 
         UpdateProfileRequestDTO request = new UpdateProfileRequestDTO();
         request.setName("변경이름");
-        request.setPhoneNum("010-0000-0000");
+        request.setPhonenum("010-0000-0000");
 
         // when then
         assertThrows(IllegalArgumentException.class, () -> {
