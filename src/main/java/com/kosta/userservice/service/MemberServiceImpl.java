@@ -83,7 +83,7 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("이메일을 찾을 수 없습니다."));
 
-        member.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
+        member.setPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
         memberRepository.save(member);
 
     }
@@ -91,7 +91,7 @@ public class MemberServiceImpl implements MemberService {
 
     private void validateResetPassword(ResetPasswordRequestDTO request) {
 
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
+        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
     }
